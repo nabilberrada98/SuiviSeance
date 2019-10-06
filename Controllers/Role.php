@@ -14,7 +14,7 @@ class Role
         $controller=new Controller();
         $sth = $controller->query($sql,[$role_id],"json",false);
         foreach($sth as $row) {
-            $role->permissions[$row["perm_desc"]] = true;
+            $role->permissions[utf8_encode($row["perm_desc"])] = true;
         }
         return $role;
     }

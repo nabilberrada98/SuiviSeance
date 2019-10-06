@@ -1,5 +1,5 @@
 <footer class="main-footer">
-    <strong>Copyright &copy; 2018 <a href="#">Nabil Berrada & Nawfel Bougrine</a>.</strong>
+    <strong>Copyright &copy; 2018 <a href="https://www.linkedin.com/in/berrada-nabil-711744143/">Nabil Berrada & Nawfel Bougrine</a>.</strong>
 </footer>
 <aside class="control-sidebar control-sidebar-dark">
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
@@ -10,6 +10,7 @@
         <div>
             
         </div>
+        
         <div>
             
         </div>

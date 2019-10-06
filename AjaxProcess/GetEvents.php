@@ -5,10 +5,10 @@ require_once '../classes/Database.php';
 require_once '../classes/Config.php';
 require_once '../Controllers/Controller.php';
 require_once '../Controllers/CalendrierController.php';
+require_once '../Controllers/CalendrierDesCoursController.php';
 $semestre=$_GET['semestreParam'];
-$typeSeance=$_GET['type'];
-$controller = new CalendrierController();
-$events = $controller->getEvents($semestre,$typeSeance);
+$controller = new CalendrierDesCoursController();
+$events = $controller->getEvents($semestre);
 echo $events;
 exit;
 ?>

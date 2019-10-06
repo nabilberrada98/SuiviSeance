@@ -4,8 +4,6 @@ This is a starter template page. Use this page to start your new project from
 scratch. This page gets rid of all links and provides the needed markup only.
 -->
 <?php
-$controller = new AvancementCoursController();
-$listeAvancement = $controller->getAvancementCours();
 if (isset($_SESSION['googleId'])) {
     $googleId = $_SESSION['googleId'];
     $user_name = $_SESSION['user_name'];
@@ -15,38 +13,106 @@ if (isset($_SESSION['googleId'])) {
 } else {
     header("Location: login");
 }
+$controller = new AvancementCoursController();
+if ($user_priv->hasPrivilege("Voir état avancement de tous les cours")) {
+    $listeAvancement = $controller->getAvancementCours();
+} else {
+    $listeAvancement = $controller->getAvancementCours($user_priv->user_id);
+}
 ?>
 <html>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
+         <link rel="icon" type="image/png" href="Views/dist/img/logo.png" />
         <title>Avancement des cours | SuiviSeance</title>
-        <!-- Tell the browser to be responsive to screen width -->
+        <script src="Views/plugins/jQuery/jquery-2.2.3.min.js"></script>
         <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-        <!-- Bootstrap 3.3.6 -->
         <link rel="stylesheet" href="Views/bootstrap/css/bootstrap.min.css">
-        <!-- Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
-        <!-- Ionicons -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-        <!-- Theme style -->
         <link rel="stylesheet" href="Views/dist/css/AdminLTE.min.css">
-
-        <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
-              page. However, you can choose any other skin. Make sure you
-              apply the skin class to the body tag so the changes take effect.
-        -->
+        <link rel="stylesheet" href="Views/bootstrap/css/bootstrap.min.css">
         <link rel="stylesheet" href="Views/dist/css/skins/skin-blue.min.css">
         <link href="Views/plugins/datatables/jquery.dataTables.css" rel="stylesheet" type="text/css"/>
-
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
+        <style>
+            .hoverebale:hover{
+                color: #3C8DBC;
+                cursor: help;
+            }
+        </style>
     </head>
-    <body class="hold-transition skin-blue sidebar-mini">
+    <body class="hold-transition skin-blue sidebar-mini sidebar-collapse">
+        <div class="modal modal-primary fade" id="Infos" data-backdrop="false" tabindex="-1" role="dialog" >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Informations</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="box box-info">
+                            <div class="box-body">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-book"></i> &nbsp; &nbsp; Adresse email
+                                    </div>
+                                    <input type="text" disabled class="form-control" id="AdresseEmailInfo">
+                                </div>
+                                <br>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-key"></i> &nbsp; &nbsp; Numéro de téléphone
+                                    </div>
+                                    <input type="text" disabled class="form-control" id="TelefInfo">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="modal modal-primary fade" id="InfoMatiere" data-backdrop="false" tabindex="-1" role="dialog" >
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Informations sur la matière</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="box box-info">
+                            <div class="box-body">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-book"></i> &nbsp; &nbsp; Filière
+                                    </div>
+                                    <input type="text" disabled class="form-control" id="filInfo">
+                                </div>
+                                <br>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-key"></i> &nbsp; &nbsp; Semestre
+                                    </div>
+                                    <input type="text" disabled class="form-control" id="SemInfo">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script>
             jQuery('body').css('display', 'none');
             jQuery(document).ready(function () {
@@ -56,20 +122,7 @@ if (isset($_SESSION['googleId'])) {
                 jQuery('body').fadeIn();
             }, 1000);
         </script>
-        <style>
-            td[value]:hover:after {
-                content: attr(value);
-                position: absolute;
-                /*top: -100%;*/
-                left: 50%;
-                color : white;
-                background-color: #3C8DBC;
-                border-radius : 15px;
-                padding :5px;
-                border : 1px solid #374850;
-                box-shadow: 5px 10px #888888;;
-            }
-        </style>
+
         <div class="wrapper">
             <!-- Main Header -->
             <?php require_once 'includes/header.php'; ?>
@@ -79,51 +132,58 @@ if (isset($_SESSION['googleId'])) {
             <!-- Content Wrapper. Contains page content -->
             <div class="content-wrapper">
                 <!-- Content Header (Page header) -->
-                <section class="content-header" >
-                    Avancement Cours :
-                </section>
-                <!-- Main content -->
                 <section class="content">
                     <div class="row">
                         <div class="box">
                             <div class="box-header">
-                                <h3 class="box-title">Liste Des Matières : </h3>
+                                <h3 class="box-title">Avancement des Cours : </h3>
                             </div>
                             <div class="box-body">
                                 <table class="table table-hover table-responsive">
                                     <thead>
                                         <tr>
-                                            <th>Professeur</th>
                                             <th>Nom Matiere</th>
+                                            <th>Professeur</th>
                                             <th>Volume d'heures</th>
                                             <th>Nombre séances réalisé</th>
                                             <th>Nombre d'heures réalisé</th>
                                             <th>Nombre de retards</th>
                                             <th>Durée total des retards</th>
                                             <th>Reste a faire</th>
+                                            <th>séances restante</th>
                                             <th>Accomplissement</th>
-                                            <th>Responsable scolarité</th>
+                                            <th>Accomplissement Semestre</th>
+                                            <th>Responsable de scolarité</th>
                                             <th>Directeur pédagogique</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php foreach ($listeAvancement as $av): ?>
-                                            <tr>
-                                                <td style="vertical-align: middle" value="<?= 'Email : ' . $av->prof_email . ' | Téléphone : ' . $av->prof_phone ?>"><?= $av->prof_name ?></td>
-                                                <td style="vertical-align: middle"><?= $av->nom ?></td>
+                                        <?php foreach ($listeAvancement as $av):
+                                            $percent=(100 * $av->realise) / ($av->volume_heures * 60);
+                                            $avMax =$av->RealisationSemestre>=100?100 :$av->RealisationSemestre;
+                                            ?>
+                                        <tr <?php if(($av->RealisationSemestre-$percent)>=25){ echo "style='background-color: #F5C6CB;' "; }else if(($av->RealisationSemestre-$percent) > 10 ){echo "style='background-color: #FFEEBA;' "; } ?> > 
+                                            <td style="vertical-align: middle" class="hoverebale" filiere="<?= $av->nom_filiere ?>" semestre="<?= $av->nomSemestre ?>" onclick="showInfoMatiere($(this).attr('filiere'), $(this).attr('semestre'))"><?= $av->nom ?></td>
+                                                <td class="hoverebale" onclick="showInfos('Information sur le Professeur',$(this).attr('email'), $(this).attr('phone'))" email="<?= $av->prof_email ?>" phone="<?= $av->prof_phone ?>"  ><?= $av->prof_name ?></td>
                                                 <td style="vertical-align: middle"><?= $av->volume_heures ?></td>
                                                 <td style="vertical-align: middle"><?= $av->total_seance ?></td>
-                                                <td style="vertical-align: middle"><?= $controller->convertToHoursMins($av->realise)?></td>
-                                                <td style="vertical-align: middle"><?= $av->nbr_retard?></td>
-                                                <td style="vertical-align: middle"><?=$av->total_retard>60?$controller->convertToHoursMins( $av->total_retard ):$av->total_retard.' min'?></td>
-                                                <td style="vertical-align: middle"><?=$controller->convertToHoursMins($av->reste_a_faire)?></td>
+                                                <td style="vertical-align: middle"><?= $controller->convertToHoursMins($av->realise) ?></td>
+                                                <td style="vertical-align: middle"><?= $av->nbr_retard ?></td>
+                                                <td style="vertical-align: middle"><?= $av->total_retard > 60 ? $controller->convertToHoursMins($av->total_retard) : $av->total_retard . ' min' ?></td>
+                                                <td style="vertical-align: middle"><?= $controller->convertToHoursMins($av->reste_a_faire) ?></td>
+                                                <td><?=Round($av->reste_a_faire/90)?></td>
                                                 <td style="vertical-align: middle">
                                                     <div class="progress progress-xs progress-striped active">
-                                                        <div class="progress-bar progress-bar-success" style="width: <?= (100 * $av->realise) / ($av->volume_heures*60) ?>%"></div>
+                                                        <div class="progress-bar progress-bar-success" style="width: <?=$percent?>%"><?=round($percent)?>%</div>
                                                     </div>
                                                 </td>
-                                                <td style="vertical-align: middle" value="<?= 'Email : ' . $av->responsable_email . ' | Téléphone : ' . $av->responsable_phone ?>"><?= $av->responsable_name ?></td>
-                                                <td style="vertical-align: middle" value="<?= 'Email : ' . $av->directeur_email . ' | Téléphone : ' . $av->directeur_phone ?>"><?= $av->directeur_name ?></td>
+                                                <td style="vertical-align: middle">
+                                                    <div class="progress progress-xs progress-striped active">
+                                                        <div class="progress-bar <?=$av->RealisationSemestre>=85 ?'progress-bar-red':$av->RealisationSemestre>=50 ?'progress-bar-warning':'progress-bar-success' ?>" style="width: <?=$av->RealisationSemestre?>%"><?=round($avMax)?>%</div>
+                                                    </div>
+                                                </td>
+                                                <td style="vertical-align: middle" class="hoverebale" onclick="showInfos('Information sur le Responsable de scolarité',$(this).attr('email'), $(this).attr('phone'))" email="<?= $av->responsable_email ?>" phone="<?= $av->responsable_phone ?>"><?= $av->responsable_name ?></td>
+                                                <td style="vertical-align: middle" class="hoverebale" onclick="showInfos('Information sur le Directeur pédagogique',$(this).attr('email'), $(this).attr('phone'))" email="<?= $av->directeur_email ?>" phone="<?= $av->directeur_phone ?>"><?= $av->directeur_name ?></td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </tbody>
@@ -141,74 +201,29 @@ if (isset($_SESSION['googleId'])) {
 
 
         </div>
-        <!-- ./wrapper -->
-
         <!-- REQUIRED JS SCRIPTS -->
 
-        <!-- jQuery 2.2.3 -->
-        <script src="Views/plugins/jQuery/jquery-2.2.3.min.js"></script>
-        <!-- Bootstrap 3.3.6 -->
         <script src="Views/bootstrap/js/bootstrap.min.js"></script>
-        <!-- AdminLTE App -->
         <script src="Views/plugins/notify.min.js" type="text/javascript"></script>
         <script src="Views/dist/js/app.min.js"></script>
         <script src="Views/plugins/datatables/jquery.dataTables.min.js"></script>
         <script src="Views/plugins/datatables/dataTables.bootstrap.min.js"></script>
+        <script src="Views/personnalJs/Utils.js" type="text/javascript"></script>
         <script>
-            function SupprimerMatiere() {
-                $.post("AjaxProcess/GestionMatiere/SuppMatiere.php", {idMatiere: $("#SuppNomMatiere").val()}, function (data, status) {
-                    if (parseInt(data) >= 1) {
-                        displayNotification("Matière supprimé avec succées", "success");
-                    } else {
-                        displayNotification("Matière non supprimé", "danger");
-                    }
-                });
-            }
-
-            function displayNotification(text, className) {
-                $.notify(text, {
-                    clickToHide: true,
-                    autoHide: true,
-                    autoHideDelay: 3000,
-                    arrowShow: true,
-                    arrowSize: 150,
-                    className: className,
-                    gap: 120
-                });
-            }
-            $(document).ready(function () {
-                $('.table').DataTable({
-                    language: {
-                        processing: "Traitement en cours...",
-                        search: "Rechercher&nbsp;:",
-                        lengthMenu: "Afficher _MENU_ &eacute;l&eacute;ments",
-                        info: "Affichage de l'&eacute;lement _START_ &agrave; _END_ sur _TOTAL_ &eacute;l&eacute;ments",
-                        infoEmpty: "Affichage de l'&eacute;lement 0 &agrave; 0 sur 0 &eacute;l&eacute;ments",
-                        infoFiltered: "(filtr&eacute; de _MAX_ &eacute;l&eacute;ments au total)",
-                        infoPostFix: "",
-                        loadingRecords: "Chargement en cours...",
-                        zeroRecords: "Aucun &eacute;l&eacute;ment &agrave; afficher",
-                        emptyTable: "Aucune donnée disponible dans le tableau",
-                        paginate: {
-                            first: "Premier",
-                            previous: "Pr&eacute;c&eacute;dent",
-                            next: "Suivant",
-                            last: "Dernier"
-                        }},
-                    "paging": true,
-                    "lengthChange": true,
-                    "searching": true,
-                    "ordering": true,
-                    "info": true,
-                    "autoWidth": true
-                });
-
-            });
+                                                function showInfos(title,email, phone) {
+                                                    $("#AdresseEmailInfo").val(email);
+                                                    $("#TelefInfo").val(phone);
+                                                    $('#Infos .modal-title').text(title);
+                                                    $("#Infos").modal('show');
+                                                }
+                                                function showInfoMatiere(fil,sem) {
+                                                    $("#filInfo").val(fil);
+                                                    $("#SemInfo").val(sem);
+                                                    $("#InfoMatiere").modal('show');
+                                                }
+                                                $(document).ready(function () {
+                                                    $('.table').DataTable(DataTableParams);
+                                                });
         </script>
-
-        <!-- Optionally, you can add Slimscroll and FastClick plugins.
-             Both of these plugins are recommended to enhance the
-             user experience. Slimscroll is required when using the
-             fixed layout. -->
     </body>
 </html>

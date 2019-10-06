@@ -13,6 +13,15 @@
  */
 class Controller {
 
+    function convertToHoursMins($time) {
+        if ($time < 1) {
+            return;
+        }
+        $hours = floor(floatval($time) / 60);
+        $minutes = (floatval($time) % 60);
+        return $hours . " h et " . $minutes . " min";
+    }
+
     protected $db_instance;
 
     function test_input($data) {
@@ -60,10 +69,15 @@ class Controller {
         die('Accé interdit');
     }
 
-    public function sendMail($idSeance, $dateAnnulation, $heureAnnulation, $motif) {
+    public function sendMail($idSeance, $dateAnnulation, $heureAnnulation) {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            require_once('../phpmailer/PHPMailerAutoload.php');
-            $toList = $this->query("select m.nom , e.email from etudiants e , etud_matiere em ,matieres m , seances s where e.id = em.id_etudiant and em.id_matiere = m.id and m.id=s.id_matiere and s.id= ? ", [$idSeance], "json", false);
+            $toList=[];
+            $adresseDistrub = $this->query("select m.nom ,f.email_groupe as email from seances se , matieres m , semestres s , filieres f where se.id_matiere=m.id and m.id_semestre=s.id and s.id_filiere=f.id and  se.id = ?",[$idSeance],"json",true);
+            if (is_null($adresseDistrub)) {
+                $toList = $this->query("select m.nom , e.email from etudiants e , etud_semestre es , semestres sm,matieres m , seances s where e.id = es.id_etudiant and es.id_semestre = sm.id and m.id_semestre=sm.id and s.id_matiere=m.id and s.id = ? ", [$idSeance], "json", false);
+            }else{
+                array_push($toList, $adresseDistrub);
+            }
             $mail = new PHPMailer(true);
             $mail->CharSet = "utf-8";
             $mail->IsHTML(true);
@@ -88,7 +102,7 @@ class Controller {
             $mail->SMTPDebug = 2;
             $body = '<html>
       <body>
-        <h5>Nous tenons à vous informer que la séance prévu pour le <strong>' . $dateAnnulation . '</strong> a <strong>' . $heureAnnulation . '</strong> a été annulé <strong>' . $motif . '</strong></h5>
+        <h3>Nous tenons à vous informer que la séance prévue pour le <strong>' . $dateAnnulation . '</strong> a <strong>' . $heureAnnulation . '</strong> a été annulé .</h3>
        <br>
        <table border="0" cellspacing="0" cellpadding="0">
        <tbody>
@@ -109,7 +123,7 @@ class Controller {
                 $mail->addAddress($etudiant['email']);
             endforeach;
             $sendmail = $mail->send();
-            if (!$sendmail){
+            if (!$sendmail) {
                 echo $mail->ErrorInfo;
             }
         }

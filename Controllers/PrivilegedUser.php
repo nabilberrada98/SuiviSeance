@@ -23,7 +23,7 @@ class PrivilegedUser
         $sth = $controller->query($sql,[$this->user_id],"json",false);
         $controller=null;
         foreach ($sth as $row) {
-            $this->roles[$row["role_name"]] = Role::getRolePerms($row["role_id"]);
+            $this->roles[utf8_encode($row["role_name"])] = Role::getRolePerms($row["role_id"]);
         }
     }
     public function hasPrivilege($perm) {

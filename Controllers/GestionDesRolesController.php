@@ -8,29 +8,33 @@
 
 class GestionDesRolesController extends Controller {
 
+    public function UpdateUser($id,$role , $num) {
+        $this->UpdateTable("update user_role set role_id=? where user_id=?", [$role,$id]);
+        return $this->UpdateTable("update users set user_phone = ? where user_id= ?", [$num,$id]);
+    }
+    
+    public function LockUser($id , $nvetat) {
+        return $this->UpdateTable("update users set etat = ? where user_id = ?", [$nvetat , $id]);
+    }
+    
     public function addUser($user_email, $userphone, $roleid) {
         try {
             $id = $this->AddtoDb("insert into users (user_email,user_phone) values (?,?)", [$user_email, $userphone]);
             $this->AddtoDb("insert into user_role values(?,?)", [$id, $roleid]);
-            return 'success';
+            return $id;
         } catch (Exception $e) {
             return 'Erreur de traitement : exception reçue : ' . $e->getMessage() . "\n";
         }
+    }
+    
+    public function deleteUser($id){
+        return $this->UpdateTable("delete from users where user_id = ? ", [$id]);
     }
 
     public function getUserPerms($idRole) {
         return $this->query("select p.perm_id from permissions p , role_perm rp where p.perm_id=rp.perm_id and rp.role_id = ?", [$idRole], "json");
     }
 
-    public function supprimerRole($idRole) {
-        try {
-            $this->UpdateTable("delete from role_perm where role_id = ?", [$idRole]);
-            $updated = $this->UpdateTable("delete from roles where role_id = ?", [$idRole]);
-            return $updated;
-        } catch (Exception $e) {
-            echo 'Erreur de traitement : exception reçue : ', $e->getMessage(), "\n";
-        }
-    }
 
     public function modifierRole($idRole, $perms) {
         try {
@@ -45,7 +49,7 @@ class GestionDesRolesController extends Controller {
     }
 
     public function getAllUsers() {
-        return $this->query("SELECT u.*,r.* FROM users u , user_role ur , roles r where u.user_id = ur.user_id and ur.role_id = r.role_id", null, "UserEntity", false);
+        return $this->query("SELECT u.*,r.* FROM users u , user_role ur , roles r where u.user_id = ur.user_id and ur.role_id = r.role_id and r.role_name<>'administrateur'", null, "UserEntity", false);
     }
 
     public function getAllPermissions() {
@@ -53,7 +57,7 @@ class GestionDesRolesController extends Controller {
     }
 
     public function getAllRoles() {
-        return $this->query("SELECT * FROM roles r order by role_name", null, "RoleEntity", false);
+        return $this->query("SELECT * FROM roles r where r.role_name<>'administrateur' order by role_name", null, "RoleEntity", false);
     }
 
     public function AddRole($nomRole, $perms) {
